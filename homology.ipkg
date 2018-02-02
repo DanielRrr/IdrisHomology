@@ -1,0 +1,9 @@
+package homology
+
+sourcedir = src
+
+pkgs = effects
+
+modules = Homology
+
+opts = "--partial-eval"
