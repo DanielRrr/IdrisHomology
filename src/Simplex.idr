@@ -41,3 +41,16 @@ fromList = MkSC . (sortBy compare) . (map MkS) . nub . map (sort . nub)
 toList : SimplicialComplex a -> List (List a)
 toList (MkSC xs) = map toList' xs where
   toList' (MkS xs) = xs
+
+powerset : List a -> List (List a)
+powerset [] = [[]]
+powerset (x::xs) = map ((::) x) (powerset xs) ++ powerset xs
+
+subset : Eq a => List a -> List a -> Bool
+subset xs ys = and [ elem x ys | x <- ys ]
+
+isEq : Eq a => SimplicialComplex a -> Bool
+isEq m = and [ all (\x => x `elem` (toList m)) (powerset xs) | xs <- (toList m) ]
+
+isSortedSC : Ord a => SimplicialComplex a -> Bool
+isSortedSC m = isEq m && sorted (toList m)
