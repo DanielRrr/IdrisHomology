@@ -1,5 +1,7 @@
 module Simplex
 
+import Data.List
+
 data Simplex a = MkS (List a)
 
 data SimplicialComplex a = MkSC (List (Simplex a))
@@ -49,8 +51,14 @@ powerset (x::xs) = map ((::) x) (powerset xs) ++ powerset xs
 subset : Eq a => List a -> List a -> Bool
 subset xs ys = and [ elem x ys | x <- ys ]
 
-isEq : Eq a => SimplicialComplex a -> Bool
-isEq m = and [ all (\x => x `elem` (toList m)) (powerset xs) | xs <- (toList m) ]
+isSC : Eq a => SimplicialComplex a -> Bool
+isSC m = and [ all (\x => x `elem` (toList m)) (powerset xs) | xs <- (toList m) ]
+
+isSortedSC' : Ord a => SimplicialComplex a -> Bool
+isSortedSC' m = sorted (toList m)
 
 isSortedSC : Ord a => SimplicialComplex a -> Bool
-isSortedSC m = isEq m && sorted (toList m)
+isSortedSC m = isSC m && isSortedSC' m
+
+nSimplexes : Nat -> SimplicialComplex a -> List (Simplex a)
+nSimplexes n m = (map MkS) $ filter (\x => (List.length x) == n + 1) (toList m)
