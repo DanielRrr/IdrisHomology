@@ -30,6 +30,9 @@ implementation Eq (Simplex a) => Ord (Simplex a) where
     LT => LT
     GT => GT
 
+{-implementation (DecEq a) => DecEq (Simplex a) where -}
+
+
 implementation Functor Simplex where
   map f (MkS xs) = MkS (map f xs)
 
@@ -61,8 +64,13 @@ data SCElem : Simplex a -> SimplicialComplex a -> Type where
   SCHere : SCElem x (x !! xs)
   SCThere : (m : SCElem x xs) -> SCElem x (y !! xs)
 
-data Subset : SimplicialComplex a -> SimplicialComplex a -> Type where
-  subset : (x : Simplex a) -> (xs, ys : SimplicialComplex a) -> (SCElem x xs -> SCElem x ys) -> Subset xs ys
+{-mkSCElem : (Eq a) => (x : Simplex a) -> (SimplicialComplex a) -> Maybe (SCElem x sc)
+mkSCElem x SCNil = Nothing
+mkSCElem x (y !! sc) = case (decEq x y) of
+  Yes _ => Just SCHere
+  No _ => do p <- mkSCElem x sc
+             return (SCThere p) -}
+
 
 data So : Bool -> Type where
   Oh : So True
@@ -88,3 +96,18 @@ data IsSortedSC : SimplicialComplex a -> Type where
                                   -> (isLte x y)
                                     -> IsSortedSC (y !! xs)
                                      -> IsSortedSC (x !! (y !! xs))
+
+mkIsSortedSC : Ord a => (sc : SimplicialComplex a) -> Maybe (IsSortedSC sc)
+mkIsSortedSC SCNil = Just IsSortedEmpty
+mkIsSortedSC (x !! SCNil) = Just (IsSortedSingle x)
+mkIsSortedSC (x !! (y !! sc)) =
+  case (mkIsLte x y) of
+    Nothing => Nothing
+    (Just proofOfLte) => case (mkIsSortedSC (y !! sc)) of
+      Nothing => Nothing
+      Just proofOfSorted => Just (IsSortedMany x y sc proofOfLte proofOfSorted)
+
+data IsSubset : SimplicialComplex a -> SimplicialComplex a -> Type where
+  SCEmpty : (sc : SimplicialComplex a) -> IsSubset SCNil sc
+  SCSingle : (x : Simplex a) -> (sc : SimplicialComplex a) -> Maybe (SCElem x sc) -> IsSubset (x !! SCNil) sc
+  SCMany : Eq a => (sc1, sc2 : SimplicialComplex a) -> (x : Simplex a) -> IsSubset sc1 sc2 -> IsSubset (x !! sc1) (x !! sc2)
