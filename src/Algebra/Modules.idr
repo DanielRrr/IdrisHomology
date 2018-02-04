@@ -1,5 +1,7 @@
 module Modules
 
+%access public export
+
 interface (Semigroup a, Semigroup b, Monoid a, Monoid b) => Homo a b where
   homo : a -> b
 
@@ -19,7 +21,7 @@ interface (AbelianGroup a, Ring a) => IsRing a where
   SecondDisrt : (x, y, z : a) -> (x <+> y) <**> z = x <**> z <+> y <**> z
 
 interface Ring a => RingWithOne a where
-  ringMempty : a
+  e : a
 
 interface (IsRing a, RingWithOne a) => IsRingWithOne a where
   UnitLaw1 : (x : a) -> x <**> ringMempty = x
@@ -34,4 +36,4 @@ interface LeftRModule a b => IsLeftRModule a b where
   FirstLaw : (x,y : b) -> (z : a) -> (x <+> y) <..> z = (x <..> z) <+> (y <..> z)
   SecondLaw : (x : b) -> (y, z : a) -> x <..> (y <+> z) = (x <..> y) <+> (x <..> z)
   ThirdLaw : (x,y : b) -> (z : a) -> (x <**> y) <..> z = x <..> (y <..> z)
-  FourthLaw : (x : b) -> (y : a) -> (Modules.ringMempty <**> x) <..> y = x <..> y
+  FourthLaw : (x : b) -> (y : a) -> (e <**> x) <..> y = x <..> y
